@@ -27,6 +27,39 @@ const CompraSchema = new mongoose.Schema({
   impuestos: { type: Number, default: 0 }
 })
 
+/**
+ * @swagger
+ * /api/checkout/create-checkout-session:
+ *   post:
+ *     summary: Crear sesión de pago con Stripe
+ *     tags: [Checkout]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               cart:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               token:
+ *                 type: string
+ *               direccion:
+ *                 type: string
+ *               telefono:
+ *                 type: string
+ *               notas:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: URL de la sesión de Stripe
+ *       400:
+ *         description: Datos faltantes
+ *       500:
+ *         description: Error en el servidor
+ */
 router.post('/create-checkout-session', async (req, res) => {
   const { cart, token, direccion, telefono, notas } = req.body
   console.log("Cart recibido:", cart)

@@ -7,6 +7,31 @@ const verifyToken = require('../middleware/verifyToken')
 const nodemailer = require('nodemailer')
 const Compra = require('../models/Compra')
 
+/**
+ * @swagger
+ * /api/usuarios/registro:
+ *   post:
+ *     summary: Registrar un nuevo usuario
+ *     tags: [Usuarios]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Usuario registrado
+ *       400:
+ *         description: Error de validación
+ */
 router.post('/registro', async (req, res) => {
   try {
     const { username, email, password } = req.body
@@ -44,6 +69,29 @@ router.post('/registro', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /api/usuarios/login:
+ *   post:
+ *     summary: Iniciar sesión de usuario
+ *     tags: [Usuarios]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token JWT
+ *       400:
+ *         description: Credenciales inválidas
+ */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
@@ -67,6 +115,20 @@ router.post('/login', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /api/usuarios/verificar-usuario:
+ *   get:
+ *     summary: Verificar usuario autenticado
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Usuario autenticado
+ *       401:
+ *         description: Token inválido
+ */
 router.get('/verificar-usuario', verifyToken, async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.usuario.id).select('-password')
@@ -85,6 +147,27 @@ function generarPasswordTemporal(length = 8) {
   return password
 }
 
+/**
+ * @swagger
+ * /api/usuarios/recuperar-password:
+ *   post:
+ *     summary: Recuperar contraseña de usuario
+ *     tags: [Usuarios]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Correo de recuperación enviado
+ *       404:
+ *         description: Usuario no encontrado
+ */
 router.post('/recuperar-password', async (req, res) => {
   const { email } = req.body
   try {
@@ -127,6 +210,20 @@ router.post('/recuperar-password', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /api/usuarios/compras:
+ *   get:
+ *     summary: Obtener historial de compras del usuario autenticado
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de compras
+ *       401:
+ *         description: Token inválido
+ */
 router.get('/compras', verifyToken, async (req, res) => {
   try {
     const compras = await Compra.find({ usuario: req.usuario.id }).sort({ fecha: -1 })
