@@ -10,25 +10,34 @@ const Compra = require('../models/Compra')
 router.post('/registro', async (req, res) => {
   try {
     const { username, email, password } = req.body
+    if (!username || typeof username !== 'string' || username.trim().length === 0) {
+      return res.status(400).json({ mensaje: 'El nombre de usuario es obligatorio.' })
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email || typeof email !== 'string' || !emailRegex.test(email)) {
+      return res.status(400).json({ mensaje: 'El correo electrónico no tiene un formato válido.' })
+    }
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ mensaje: 'La contraseña debe tener al menos 6 caracteres.' })
+    }
     const existeUsuario = await Usuario.findOne({ email })
     if (existeUsuario) {
       return res.status(400).json({ mensaje: 'El usuario ya existe' })
     }
-
+    const existeNombre = await Usuario.findOne({ username })
+    if (existeNombre) {
+      return res.status(400).json({ mensaje: 'El nombre de usuario ya está en uso' })
+    }
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
-
     const nuevoUsuario = new Usuario({
       username,
       email,
       password: hashedPassword
     })
-
     await nuevoUsuario.save()
-
     const payload = { id: nuevoUsuario._id }
     const token = jwt.sign(payload, process.env.SECRET, { expiresIn: '1d' })
-
     res.status(201).json({ token })
   } catch (error) {
     res.status(500).json({ mensaje: 'Error en el servidor' })
