@@ -1,0 +1,13 @@
+# Node
+node_modules/
+.env
+package-lock.json
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor settings
+.vscode/
+.DS_Store
